@@ -40,7 +40,17 @@ export default class Sticky extends React.Component {
   }
 
   componentDidMount() {
-    this.on(['resize', 'scroll', 'touchstart', 'touchmove', 'touchend', 'pageshow', 'load'], this.recomputeState);
+    this.scrollContainer = document.getElementById('react-stickyScroll');
+
+    const windowEvents = this.scrollContainer
+      ? ['resize', 'pageshow', 'load']
+      : ['resize', 'scroll', 'touchstart', 'touchmove', 'touchend', 'pageshow', 'load'];
+    this.on(window, windowEvents, this.recomputeState);
+
+    if (this.scrollContainer) {
+      this.on(this.scrollContainer, ['scroll', 'touchstart', 'touchmove', 'touchend'], this.recomputeState);
+    }
+
     this.recomputeState();
   }
 
@@ -49,7 +59,15 @@ export default class Sticky extends React.Component {
   }
 
   componentWillUnmount() {
-    this.off(['resize', 'scroll', 'touchstart', 'touchmove', 'touchend', 'pageshow', 'load'], this.recomputeState);
+    const windowEvents = this.scrollContainer
+      ? ['resize', 'pageshow', 'load']
+      : ['resize', 'scroll', 'touchstart', 'touchmove', 'touchend', 'pageshow', 'load'];
+    this.off(window, windowEvents, this.recomputeState);
+
+    if (this.scrollContainer) {
+      this.off(this.scrollContainer, ['scroll', 'touchstart', 'touchmove', 'touchend'], this.recomputeState);
+    }
+
     this.channel.unsubscribe(this.updateContext);
   }
 
@@ -115,15 +133,15 @@ export default class Sticky extends React.Component {
     }
   }
 
-  on(events, callback) {
+  on(target, events, callback) {
     events.forEach((evt) => {
-      window.addEventListener(evt, callback);
+      target.addEventListener(evt, callback);
     });
   }
 
-  off(events, callback) {
+  off(target, events, callback) {
     events.forEach((evt) => {
-      window.removeEventListener(evt, callback);
+      target.removeEventListener(evt, callback);
     });
   }
 
